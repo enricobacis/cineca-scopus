@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# api key file
+/config.py
+
+# input/output files
+*.csv
