@@ -92,5 +92,5 @@ ENV/
 /config.py
 
 # input/output files
-*.csv
-out.txt
+data/*.csv
+data/*.db
