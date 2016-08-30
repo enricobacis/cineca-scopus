@@ -1,47 +1,65 @@
+from itertools import chain
 import requests
+
+_HEADERS = {'Accept': 'application/json'}
+
+class ScopusResponse(object):
+
+    def __init__(self, data):
+        self._data = data
+
+    def __getitem__(self, key):
+        return self._data['search-results'][key]
+
+    def __iter__(self):
+        resp = self
+        while resp:
+            yield resp
+            resp = resp.next()
+
+    def entries(self):
+        return [] if self.is_empty() else self['entry']
+
+    def is_empty(self):
+        return int(self['opensearch:totalResults']) == 0
+
+    def next_page_url(self):
+        try: return next(l['@href'] for l in self['link'] if l['@ref']=='next')
+        except: return None
+
+    def next(self):
+        url = self.next_page_url()
+        if not url: return None
+        return ScopusResponse(requests.get(url, headers=_HEADERS).json())
+
+    def all_entries(self):
+        return list(chain.from_iterable(page.entries() for page in self))
+
 
 class ScopusClient(object):
 
     _AUTHOR_API = 'http://api.elsevier.com/content/search/author'
     _SCOPUS_API = 'http://api.elsevier.com/content/search/scopus'
-    _HEADERS = {'Accept': 'application/json'}
 
     def __init__(self, apiKey):
         self.apiKey = apiKey
 
-    def _api(self, endpoint, query, parse=False):
-        resp = requests.get(endpoint, headers=self._HEADERS,
+    def _api(self, endpoint, query):
+        resp = requests.get(endpoint, headers=_HEADERS,
                 params={'apiKey': self.apiKey, 'query': query})
-        return resp.json() if parse else resp
+        return ScopusResponse(resp.json())
 
-    def _is_empty(self, resp):
-        return int(resp['search-results']['opensearch:totalResults']) == 0
+    def authorSearch(self, query):
+        return self._api(self._AUTHOR_API, query)
 
-    def _all_pages(self, resp):
-        if not self._is_empty(resp):
-            while True:
-                yield resp
-                try:
-                    url = next(li['@href']
-                               for li in resp['search-results']['link']
-                               if li['@ref'] == 'next')
-                    resp = requests.get(url, headers=self._HEADERS).json()
-                except: break
-
-    def authorSearch(self, query, parse=False):
-        return self._api(self._AUTHOR_API, query, parse)
-
-    def scopusSearch(self, query, parse=False):
-        return self._api(self._SCOPUS_API, query, parse)
+    def scopusSearch(self, query):
+        return self._api(self._SCOPUS_API, query)
 
     def get_scopus_entries(self, same_author_ids):
         query = ' OR '.join('AU-ID(%s)' % ID for ID in same_author_ids)
-        resp = self.scopusSearch(query, parse=True)
-        return [entry for page in self._all_pages(resp)
-                      for entry in page['search-results']['entry']]
+        return self.scopusSearch(query).all_entries()
 
     def get_authors(self, first, last, affil, subjabbr):
         query = ('authlast(%s) AND authfirst(%s) AND affil(%s) AND subjabbr(%s)'
                  % (last, first, affil, subjabbr))
-        resp = self.authorSearch(query, parse=True)
-        return [] if self._is_empty(resp) else resp['search-results']['entry']
+        return self.authorSearch(query).all_entries()
