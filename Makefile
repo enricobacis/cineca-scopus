@@ -1,7 +1,8 @@
-.PHONY  : all clean install run
+.PHONY  : all clean install run run2
 
-VENV = venv
-MAIN = src/cineca.py
+VENV  = venv
+MAIN  = src/cineca.py
+MAIN2 = src/cineca2.py
 
 all: install
 
@@ -10,6 +11,9 @@ install: $(VENV)
 
 run: install
 	$(VENV)/bin/python $(MAIN)
+
+run2: install
+	$(VENV)/bin/python $(MAIN2)
 
 clean:
 	@ rm -rf $(VENV) build dist *.egg-info
