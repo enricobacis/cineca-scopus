@@ -89,7 +89,7 @@ ENV/
 .ropeproject
 
 # api key file
-/config.py
+config.py
 
 # input/output files
 data/*.csv
