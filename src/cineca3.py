@@ -3,11 +3,12 @@ from argparse import ArgumentParser
 from csv import DictWriter
 import sqlite3
 import json
+import re
 
 FIELDS = ['author', 'identifier', 'eid', 'title', 'aggregationType',
           'citedby-count', 'publicationName', 'isbn', 'issn', 'volume',
           'issueIdentifier', 'pageRange', 'pageNum', 'coverDate',
-          'coverDisplayDate', 'doi']
+          'coverDisplayDate', 'doi', 'numAuthors']
 
 QUERY = 'SELECT author, entries FROM articles ORDER BY author'
 
@@ -26,7 +27,10 @@ def process(author, entry):
             del entry[key]
             key = key.partition(':')[2]
             entry[key] = value
-        if key not in FIELDS: del entry[key]
+
+    match = re.match('Author list of (\d+)', entry.get('message', ''))
+    if match: entry['numAuthors'] = int(match.group(1))
+    else: entry['numAuthors'] = len(entry.get('author', [])) or None
 
     entry['author'] = author
     entry['pageNum'] = pagenum(entry['pageRange'])
@@ -41,7 +45,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     with open(args.OUTFILE, 'w') as csvfile:
-        csvwriter = DictWriter(csvfile, FIELDS)#, extrasaction='ignore')
+        csvwriter = DictWriter(csvfile, FIELDS, extrasaction='ignore')
         csvwriter.writeheader()
         with sqlite3.connect(args.DBFILE) as connection:
             with closing(connection.cursor()) as cursor:
