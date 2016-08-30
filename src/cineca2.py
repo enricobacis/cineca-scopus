@@ -1,17 +1,12 @@
-from collections import namedtuple
 from contextlib import closing
-from operator import itemgetter
-from tabulate import tabulate
 from scopus import ScopusClient
-import os.path
 import sqlite3
 import json
-import sys
 
 from colorama import init, Fore
 init(autoreset=True)
 
-from config import APIKEY, FILENAME, DBFILE
+from config import APIKEY, DBFILE
 
 if __name__ == '__main__':
     sc = ScopusClient(APIKEY)
