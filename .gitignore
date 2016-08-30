@@ -95,3 +95,4 @@ config.py
 data/*.csv
 data/*.db
 data/*.bak
+data/*.db-journal
