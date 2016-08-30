@@ -48,7 +48,7 @@ def sorted_entries(entries, ateneo):
 
 def get_entries(sc, namefield):
     for name, surname in iterate_names(*split_name(namefield)):
-        entries = sc.get_entries(name, surname, 'Italy', 'COMP')
+        entries = sc.get_authors(name, surname, 'Italy', 'COMP')
         if entries: return entries
     return []
 
