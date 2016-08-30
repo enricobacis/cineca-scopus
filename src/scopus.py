@@ -43,20 +43,23 @@ class ScopusClient(object):
     def __init__(self, apiKey):
         self.apiKey = apiKey
 
-    def _api(self, endpoint, query):
-        resp = requests.get(endpoint, headers=_HEADERS,
-                params={'apiKey': self.apiKey, 'query': query})
+    def _api(self, endpoint, query, extra_params=None):
+        params = extra_params.copy() if extra_params else {}
+        params.update({'apiKey':self.apiKey, 'query':query})
+        resp = requests.get(endpoint, headers=_HEADERS, params=params)
         return ScopusResponse(resp.json())
 
-    def authorSearch(self, query):
-        return self._api(self._AUTHOR_API, query)
+    def authorSearch(self, query, extra_params=None):
+        return self._api(self._AUTHOR_API, query, extra_params)
 
-    def scopusSearch(self, query):
-        return self._api(self._SCOPUS_API, query)
+    def scopusSearch(self, query, complete=False, extra_params=None):
+        extra_params = extra_params.copy() if extra_params else {}
+        extra_params.update({'view': 'COMPLETE' if complete else 'STANDARD'})
+        return self._api(self._SCOPUS_API, query, extra_params)
 
-    def get_scopus_entries(self, same_author_ids):
+    def get_scopus_entries(self, same_author_ids, complete):
         query = ' OR '.join('AU-ID(%s)' % ID for ID in same_author_ids)
-        return self.scopusSearch(query).all_entries()
+        return self.scopusSearch(query, complete).all_entries()
 
     def get_authors(self, first, last, affil, subjabbr):
         query = ('authlast(%s) AND authfirst(%s) AND affil(%s) AND subjabbr(%s)'
