@@ -9,15 +9,18 @@ init(autoreset=True)
 from config import APIKEY, DBFILE
 
 if __name__ == '__main__':
-    sc = ScopusClient(APIKEY)
-    query = 'SELECT author, group_concat(id) FROM authors GROUP BY author'
-    with sqlite3.connect(DBFILE) as connection:
-        connection.execute('CREATE TABLE IF NOT EXISTS articles ('
-                           'author PRIMARY KEY, data)')
-        with closing(connection.cursor()) as cursor:
-            for author, IDs in cursor.execute(query):
-                print(author, IDs)
-                entries = sc.get_scopus_entries(IDs.split(','))
-                connection.execute('INSERT INTO articles VALUES (?, ?)',
-                                   (author, json.dumps(entries)))
-                print('Entries: %d' % len(entries))
+    try:
+        sc = ScopusClient(APIKEY)
+        query = 'SELECT author, group_concat(id) FROM authors GROUP BY author'
+        with sqlite3.connect(DBFILE) as connection:
+            connection.execute('CREATE TABLE IF NOT EXISTS articles ('
+                               'author PRIMARY KEY, data)')
+            with closing(connection.cursor()) as cursor:
+                for author, IDs in cursor.execute(query):
+                    print(Fore.BLUE + ('\n%s [%s]' % ( author, IDs)))
+                    entries = sc.get_scopus_entries(IDs.split(','))
+                    connection.execute('INSERT INTO articles VALUES (?, ?)',
+                                       (author, json.dumps(entries)))
+                    print(Fore.GREEN + ('Entries: %d' % len(entries)))
+    except KeyboardInterrupt:
+        print(Fore.RED + "\nBye bye :'(")
