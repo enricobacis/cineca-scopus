@@ -17,7 +17,7 @@ if __name__ == '__main__':
         with closing(connection.cursor()) as cursor:
             for author, IDs in cursor.execute(query):
                 try:
-                    print(Fore.BLUE + ('\n%s [%s]' % ( author, IDs)))
+                    print(Fore.CYAN + ('\n%s [%s]' % ( author, IDs)))
                     entries = sc.get_scopus_entries(IDs.split(','))
                     connection.execute('INSERT INTO articles VALUES (?, ?)',
                                        (author, json.dumps(entries)))
