@@ -94,3 +94,4 @@ ENV/
 # input/output files
 data/*.csv
 data/*.db
+data/*.bak
