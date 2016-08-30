@@ -12,10 +12,9 @@ class ScopusResponse(object):
         return self._data['search-results'][key]
 
     def __iter__(self):
-        resp = self
-        while resp:
-            yield resp
-            resp = resp.next()
+        while True:
+            yield self
+            self = self.next()
 
     def entries(self):
         return [] if self.is_empty() else self['entry']
@@ -29,7 +28,7 @@ class ScopusResponse(object):
 
     def next(self):
         url = self.next_page_url()
-        if not url: return None
+        if not url: raise StopIteration
         return ScopusResponse(requests.get(url, headers=_HEADERS).json())
 
     def all_entries(self):
