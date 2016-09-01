@@ -64,6 +64,7 @@ if __name__ == '__main__':
                     entries = cursor.execute(QUERY, (author,)).fetchall()
                     if not entries:
                         print('Empty entry added for %s' % author)
+                        authordata['eid'] = authordata['identifier'] = 0
                         csvwriter.writerow(process(authordata))
                     else:
                         inserted = set()
