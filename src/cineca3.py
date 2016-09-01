@@ -68,9 +68,9 @@ if __name__ == '__main__':
                     else:
                         inserted = set()
                         for entry in json.loads(entries[0][0]):
-                            ID = entry['dc:identifier']
+                            ID = entry.get('dc:identifier', '')
                             if ID in inserted:
-                                print('Ignore duplicate (%s,%s)' % (author, id))
+                                print('Ignore duplicate (%s,%s)' % (author, ID))
                             else:
                                 inserted.add(ID)
                                 csvwriter.writerow(process(mergedicts(authordata, entry)))
