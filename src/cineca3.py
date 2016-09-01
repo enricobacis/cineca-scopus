@@ -1,5 +1,6 @@
 from contextlib import closing
 from operator import itemgetter
+from datetime import datetime
 from argparse import ArgumentParser
 from csv import DictWriter, DictReader
 import sqlite3
@@ -33,6 +34,19 @@ def process(entry):
     if match: entry['numAuthors'] = int(match.group(1))
     else: entry['numAuthors'] = len(entry.get('author', [])) or None
 
+    # eid and identifier default to 0
+    entry['eid'] = entry.get('eid', 0)
+    entry['identifier'] = entry.get('identifier', 0)
+
+    # validate coverDate (or default to 1900-01-01)
+    date = entry.get('coverDate', '')
+    try:
+        datesplit = list(map(int, date.split('-')))
+        if len(datesplit) == 3 and datesplit[1] == 0:
+            date = '%d-%d-%s' % (datesplit[0], datesplit[1]+1, datesplit[2])
+        datetime.strptime(date, '%Y-%m-%d')
+    except: entry['coverDate'] = '1900-01-01'
+
     entry['author'] = entry['Cognome e Nome']
     entry['pageNum'] = pagenum(entry.get('pageRange', None))
     return entry
@@ -64,7 +78,6 @@ if __name__ == '__main__':
                     entries = cursor.execute(QUERY, (author,)).fetchall()
                     if not entries:
                         print('Empty entry added for %s' % author)
-                        authordata['eid'] = authordata['identifier'] = 0
                         csvwriter.writerow(process(authordata))
                     else:
                         inserted = set()
