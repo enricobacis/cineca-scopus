@@ -14,7 +14,7 @@ FIELDS = ['Ateneo', 'Facoltà', 'Fascia', 'Genere', 'S.C.',
           'issueIdentifier', 'pageRange', 'pageNum', 'coverDate',
           'coverDisplayDate', 'doi', 'numAuthors']
 
-QUERY = 'SELECT entries FROM articles WHERE author = ?'
+QUERY = 'SELECT entries FROM articles WHERE author = ? AND ateneo = ?'
 
 def pagenum(pageRange):
     try:
@@ -66,16 +66,16 @@ if __name__ == '__main__':
 
     with open(args.INFILE) as infile, open(args.OUTFILE, 'w') as outfile:
         csvreader = DictReader(infile)
-        authors = [(row['Cognome e Nome'], row) for row in csvreader]
-        authors.sort(key=itemgetter(0))
+        authors = [(row['Cognome e Nome'], row['Ateneo'], row) for row in csvreader]
+        authors.sort(key=itemgetter(0, 1))
 
         csvwriter = DictWriter(outfile, FIELDS, extrasaction='ignore')
         csvwriter.writeheader()
 
         with sqlite3.connect(args.DBFILE) as connection:
             with closing(connection.cursor()) as cursor:
-                for author, authordata in authors:
-                    entries = cursor.execute(QUERY, (author,)).fetchall()
+                for author, ateneo, authordata in authors:
+                    entries = cursor.execute(QUERY, (author,ateneo)).fetchall()
                     if not entries:
                         print('Empty entry added for %s' % author)
                         csvwriter.writerow(process(authordata))
