@@ -66,5 +66,11 @@ if __name__ == '__main__':
                         print('Empty entry added for %s' % author)
                         csvwriter.writerow(process(authordata))
                     else:
+                        inserted = set()
                         for entry in json.loads(entries[0][0]):
-                            csvwriter.writerow(process(mergedicts(authordata, entry)))
+                            ID = entry['dc:identifier']
+                            if ID in inserted:
+                                print('Ignore duplicate (%s,%s)' % (author, id))
+                            else:
+                                inserted.add(ID)
+                                csvwriter.writerow(process(mergedicts(authordata, entry)))
