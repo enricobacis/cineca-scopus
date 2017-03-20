@@ -1,5 +1,7 @@
 colorama
+lxml
 pandas
 requests
+six
 tabulate
 xlrd

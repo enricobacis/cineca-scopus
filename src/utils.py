@@ -3,9 +3,9 @@ from difflib import SequenceMatcher
 import pandas
 import re
 
-def read_cineca_file(filename):
-    try: data = pandas.read_csv(filename, sep=';')
-    except: data = pandas.read_html(filename)[0]
+def read_cineca_file(filename, encoding='latin1'):
+    try: data = pandas.read_csv(filename, sep=';', encoding=encoding)
+    except: data = pandas.read_html(filename, encoding=encoding)[0]
     data['Cognome e Nome'] = data['Cognome e Nome'].str.normalize('NFKD')
     return list(row for idx, row in data.T.iteritems())
 

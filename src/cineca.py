@@ -1,4 +1,5 @@
 from collections import namedtuple
+from six.moves import input
 from operator import itemgetter
 from tabulate import tabulate
 from scopus import ScopusClient
@@ -10,8 +11,9 @@ import sqlite3
 import json
 import sys
 
-from colorama import init, Fore
+from colorama import init, Fore, Style
 init(autoreset=True)
+_RA= Style.RESET_ALL
 
 Entry = namedtuple('Entry', ['ID', 'affil_country', 'affil_city', 'affil_name',
                              'name', 'surname', 'documents', 'freqs'])
@@ -49,25 +51,25 @@ def get_entries(sc, namefield, **kwargs):
     return []
 
 def show_entries(entries):
-    print tabulate([[i, e[2]*100.] + list(e[0]) for i,e in enumerate(entries)],
-                   headers=('idx', '% match') + Entry._fields, tablefmt="grid")
+    print(tabulate([[i, e[2]*100.] + list(e[0]) for i,e in enumerate(entries)],
+                   headers=('idx', '% match') + Entry._fields, tablefmt="grid"))
 
 def user_select_entries(entries):
     while True:
-        inp = raw_input(Fore.YELLOW + '\ncomma separated indexes: ')
+        inp = input(Fore.YELLOW + '\ncomma separated indexes: ' + _RA)
         try:
             if not inp: return []
-            chosen = map(int, inp.strip().split(','))
+            chosen = list(map(int, inp.strip().split(',')))
             if min(chosen)<0 or max(chosen)>=len(entries): raise ValueError
-            print chosen
+            print(chosen)
             return [entries[c] for c in chosen]
         except ValueError:
-            print(Fore.RED + 'Indexes must be 0 <= idx < %d' % len(entries))
+            print(Fore.RED + 'Indexes must be 0 <= idx < %d' % len(entries) + _RA)
 
 def init_db(dbfile):
     if os.path.isfile(dbfile):
-        inp = raw_input(Fore.RED + "Database file already exists. " +
-                        "Type 'yes' to append, anything else to quit: ")
+        inp = input(Fore.RED + "Database file already exists. " +
+                        "Type 'yes' to append, anything else to quit: " + _RA)
         if inp.strip() != 'yes': sys.exit(0)
 
     with sqlite3.connect(dbfile) as connection:
@@ -82,20 +84,20 @@ def main(apikey, filename, dbfile):
 
     for row in read_cineca_file(filename):
         if 'Ateneo' not in row and not default_ateneo:
-            default_ateneo = raw_input(Fore.YELLOW +
-                    "No 'Ateneo' field, insert default value (e.g. Bergamo): ")
+            default_ateneo = input(Fore.YELLOW +
+                    "No 'Ateneo' field, insert default value (e.g. Bergamo): " + _RA)
         namefield, ateneo = row['Cognome e Nome'], row.get('Ateneo', default_ateneo)
 
         try:
-            print '\n%s\n\n%s\n' % ('='*80, row)
+            print('\n%s\n\n%s\n' % ('='*80, row))
             entries = sorted_entries(get_entries(sc, namefield, **extra_params), ateneo)
             if len(entries) == 0:
-                print(Fore.RED + '\nNo entries for this author\n')
+                print(Fore.RED + '\nNo entries for this author\n' + _RA)
                 continue
 
             show_entries(entries)
             if len(entries) == 1 and entries[0][2] >= 0.6:
-                print(Fore.GREEN + '\nSingle good entry for this author\n')
+                print(Fore.GREEN + '\nSingle good entry for this author\n' + _RA)
             else:
                 entries = user_select_entries(entries)
 
@@ -107,8 +109,8 @@ def main(apikey, filename, dbfile):
         except KeyboardInterrupt: break
         except Exception:
             traceback.print_exc()
-            raw_input(Fore.RED + '\nERROR processing ' + namefield +
-                          '. Press any key to continue..')
+            input(Fore.RED + '\nERROR processing ' + namefield +
+                             '. Press any key to continue..' + _RA)
 
 if __name__ == '__main__':
     from config import APIKEY, FILENAME, DBFILE
