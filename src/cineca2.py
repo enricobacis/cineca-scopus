@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from contextlib import closing
 from scopus import ScopusClient
 import sqlite3

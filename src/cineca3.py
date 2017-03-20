@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from contextlib import closing
 from operator import itemgetter
 from datetime import datetime
