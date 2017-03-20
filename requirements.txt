@@ -2,3 +2,4 @@ colorama
 pandas
 requests
 tabulate
+xlrd
