@@ -93,8 +93,10 @@ config.py
 
 # input/output files
 data/*.csv
+data/*.xls
 data/*.db
 data/*.bak
 data/*.db-journal
+data/results/
 
 .DS_Store
