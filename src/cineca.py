@@ -71,7 +71,8 @@ def init_db(dbfile):
         if inp.strip() != 'yes': sys.exit(0)
 
     with sqlite3.connect(dbfile) as connection:
-        connection.execute('CREATE TABLE IF NOT EXISTS authors(author, id UNIQUE, entry)')
+        connection.execute('CREATE TABLE IF NOT EXISTS'
+                           ' authors(author, ateneo, id UNIQUE, entry)')
 
 def main(apikey, filename, dbfile):
     sc = ScopusClient(apikey)
@@ -99,7 +100,7 @@ def main(apikey, filename, dbfile):
                 entries = user_select_entries(entries)
 
             with sqlite3.connect(DBFILE) as connection:
-                connection.executemany('INSERT INTO authors VALUES (?,?,?)',
+                connection.executemany('INSERT INTO authors VALUES (?,?,?,?)',
                     ((namefield, ateneo, e[0].ID, json.dumps(e[1]))
                         for e in entries))
 
