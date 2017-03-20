@@ -1,11 +1,13 @@
 from __future__ import division
 from difflib import SequenceMatcher
-from csv import DictReader
+import pandas
 import re
 
-def read_csv(filename):
-    with open(filename) as csvfile:
-        return list(DictReader(csvfile, dialect='excel'))
+def read_cineca_file(filename):
+    try: data = pandas.read_csv(filename, sep=';')
+    except: data = pandas.read_html(filename)[0]
+    data['Cognome e Nome'] = data['Cognome e Nome'].str.normalize('NFKD')
+    return list(row for idx, row in data.T.iteritems())
 
 def split_name(string):
     surname, name = re.search(r'^([A-Z\'\.\s]+)\s(.+)$', string).groups()
