@@ -11,16 +11,16 @@ class ScopusResponse(object):
     def __getitem__(self, key):
         return self._data['search-results'][key]
 
+    def __len__(self):
+        return int(self['opensearch:totalResults'])
+
     def __iter__(self):
         while True:
             yield self
             self = self.next()
 
     def entries(self):
-        return [] if self.is_empty() else self['entry']
-
-    def is_empty(self):
-        return int(self['opensearch:totalResults']) == 0
+        return self['entry'] if self else []
 
     def next_page_url(self):
         try: return next(l['@href'] for l in self['link'] if l['@ref']=='next')
@@ -45,7 +45,7 @@ class ScopusClient(object):
 
     def _api(self, endpoint, query, extra_params=None):
         params = extra_params.copy() if extra_params else {}
-        params.update({'apiKey':self.apiKey, 'query':query})
+        params.update({'apiKey': self.apiKey, 'query': query})
         resp = requests.get(endpoint, headers=_HEADERS, params=params)
         return ScopusResponse(resp.json())
 
@@ -54,14 +54,14 @@ class ScopusClient(object):
 
     def scopusSearch(self, query, complete=False, extra_params=None):
         extra_params = extra_params.copy() if extra_params else {}
-        extra_params.update({'view': 'COMPLETE' if complete else 'STANDARD'})
+        if 'view' not in extra_params:
+            extra_params['view'] = 'COMPLETE' if complete else 'STANDARD'
         return self._api(self._SCOPUS_API, query, extra_params)
 
-    def get_scopus_entries(self, same_author_ids, complete):
-        query = ' OR '.join('AU-ID(%s)' % ID for ID in same_author_ids)
+    def get_scopus_entries(self, author_ids, complete):
+        query = ' OR '.join('AU-ID(%s)' % ID for ID in author_ids)
         return self.scopusSearch(query, complete).all_entries()
 
-    def get_authors(self, first, last, affil, subjabbr):
-        query = ('authlast(%s) AND authfirst(%s) AND affil(%s) AND subjabbr(%s)'
-                 % (last, first, affil, subjabbr))
+    def get_authors(self, **kwargs):
+        query = ' AND '.join('%s(%s)' % item for item in kwargs.items())
         return self.authorSearch(query).all_entries()
