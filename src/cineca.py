@@ -21,16 +21,17 @@ Entry = namedtuple('Entry', ['ID', 'affil_country', 'affil_city', 'affil_name',
                              'name', 'surname', 'documents', 'freqs'])
 
 def get_frequency_for_area(entry):
-    areas = entry['subject-area']
+    areas = entry.get('subject-area', [])
     if isinstance(areas, dict): areas = [areas]
     return ', '.join('%s: %s' % (a['@abbrev'], a['@frequency']) for a in areas)
 
 def make_entry(entry):
+    affiliation = entry.get('affiliation-current', {})
     return Entry(
         ID=entry['dc:identifier'].partition(':')[2],
-        affil_country=entry['affiliation-current']['affiliation-country'],
-        affil_city=entry['affiliation-current']['affiliation-city'],
-        affil_name=entry['affiliation-current']['affiliation-name'],
+        affil_country=affiliation.get('affiliation-country'),
+        affil_city=affiliation.get('affiliation-city'),
+        affil_name=affiliation.get('affiliation-name'),
         name=entry['preferred-name']['given-name'],
         surname=entry['preferred-name']['surname'],
         documents=int(entry['document-count']),
