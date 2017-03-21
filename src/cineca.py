@@ -105,7 +105,7 @@ def main(apikey, filename, dbfile):
                 entries = user_select_entries(entries)
 
             with sqlite3.connect(DBFILE) as connection:
-                connection.executemany('INSERT INTO authors VALUES (?,?,?,?)',
+                connection.executemany('INSERT OR IGNORE INTO authors VALUES (?,?,?,?)',
                     ((namefield, ateneo, e[0].ID, json.dumps(e[1]))
                         for e in entries))
 
