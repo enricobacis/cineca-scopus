@@ -2,7 +2,7 @@
 
 VENV  = venv
 MAIN  = src/cineca.py
-MAIN2 = src/cineca2a.py
+MAIN2 = src/cineca2.py
 
 all run: $(VENV)
 	$(VENV)/bin/python $(MAIN)
