@@ -48,7 +48,7 @@ def process_entry(entry, author_id):
 
 if __name__ == '__main__':
     sc = ScopusClient(APIKEY)
-    query = 'SELECT author, id FROM authors'
+    query = 'SELECT author, id FROM authors ORDER BY author'
 
     output_file = os.path.join(os.path.dirname(DBFILE), 'products.csv')
 
