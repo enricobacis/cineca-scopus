@@ -79,11 +79,10 @@ def init_db(dbfile):
         connection.execute('CREATE TABLE IF NOT EXISTS'
                            ' authors(author, ateneo, id UNIQUE, entry)')
 
-def main(apikey, filename, dbfile):
+def main(apikey, filename, dbfile, extra_params):
     sc = ScopusClient(apikey)
     init_db(dbfile)
     default_ateneo = None
-    extra_params = {'affil': 'Italy'}
 
     for row in read_cineca_file(filename):
         if 'Ateneo' not in row and not default_ateneo:
@@ -116,5 +115,5 @@ def main(apikey, filename, dbfile):
                              '. Press any key to continue..' + _RA)
 
 if __name__ == '__main__':
-    from config import APIKEY, FILENAME, DBFILE
-    main(APIKEY, FILENAME, DBFILE)
+    from config import APIKEY, FILENAME, DBFILE, EXTRA_PARAMS
+    main(APIKEY, FILENAME, DBFILE, EXTRA_PARAMS)
