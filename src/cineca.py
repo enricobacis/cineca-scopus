@@ -79,10 +79,11 @@ def init_db(dbfile):
         connection.execute('CREATE TABLE IF NOT EXISTS'
                            ' authors(author, ateneo, id UNIQUE, entry)')
 
-def main(apikey, filename, dbfile, extra_params):
+def main(apikey, filename, dbfile, extra_params=None, olddbfile=None):
     sc = ScopusClient(apikey)
     init_db(dbfile)
     default_ateneo = None
+    extra_params = extra_params or dict()
 
     for row in read_cineca_file(filename):
         if 'Ateneo' not in row and not default_ateneo:
@@ -90,20 +91,57 @@ def main(apikey, filename, dbfile, extra_params):
                     "No 'Ateneo' field, insert default value (e.g. Bergamo): " + _RA)
         namefield, ateneo = row['Cognome e Nome'], row.get('Ateneo', default_ateneo)
 
+        print('\n%s\n\n%s\n' % ('='*80, row))
+
+        previous_entries = []
+        previous_ids = []
+        if olddbfile:
+            with sqlite3.connect(olddbfile) as connection:
+                cursor = connection.cursor()
+                cursor.execute('SELECT entry FROM authors WHERE author=? AND ateneo=?',
+                               (namefield, ateneo))
+                data = [json.loads(row[0]) for row in cursor.fetchall()]
+                previous_entries = sorted_entries(data, ateneo)
+                previous_ids = [e[0].ID for e in previous_entries]
+
         try:
-            print('\n%s\n\n%s\n' % ('='*80, row))
             entries = sorted_entries(get_entries(sc, namefield, **extra_params), ateneo)
             if len(entries) == 0:
                 print(Fore.RED + '\nNo entries for this author\n' + _RA)
-                continue
 
-            show_entries(entries)
-            if len(entries) == 1 and entries[0][2] >= 0.6:
-                print(Fore.GREEN + '\nSingle good entry for this author\n' + _RA)
+
+                if previous_entries:
+                    print(Fore.YELLOW + '\nBut previous entries exist:\n' + _RA)
+                    show_entries(previous_entries)
+                    inp = input(Fore.YELLOW + "\nUse previous entries? (Y/n) " + _RA)
+                    if inp.strip().lower() == 'n': continue
+                else:
+                    entries = previous_entries
+                    show_entries(entries)
+
             else:
-                entries = user_select_entries(entries)
+                show_entries(entries)
+                if len(entries) == 1 and entries[0][2] >= 0.6:
+                    print(Fore.GREEN + '\nSingle good entry for this author\n' + _RA)
 
-            with sqlite3.connect(DBFILE) as connection:
+                    if previous_entries:
+                        if [entries[0][0].ID] == previous_ids:
+                            print(Fore.GREEN + '\nWhich is the same as the old one.\n' + _RA)
+                        else:
+                            print(Fore.YELLOW + '\nBut differs from the old ones, which are:\n' + _RA)
+                            show_entries(previous_entries)
+                            inp = input(Fore.YELLOW + '\nKeep (o)ld, (n)ew, or (b)oth? (default=n) '
+                                        + _RA).strip().lower()
+                            if inp == 'o':
+                                entries = previous_entries
+                            elif inp == 'b':
+                                entries.extend(previous_entries)
+
+                else:
+                    print(Fore.CYAN + '\nOLD DB IDs: ' + ' '.join(previous_ids) + _RA + '\n')
+                    entries = user_select_entries(entries)
+
+            with sqlite3.connect(dbfile) as connection:
                 connection.executemany('INSERT OR IGNORE INTO authors VALUES (?,?,?,?)',
                     ((namefield, ateneo, e[0].ID, json.dumps(e[1]))
                         for e in entries))
@@ -115,5 +153,5 @@ def main(apikey, filename, dbfile, extra_params):
                              '. Press any key to continue..' + _RA)
 
 if __name__ == '__main__':
-    from config import APIKEY, FILENAME, DBFILE, EXTRA_PARAMS
-    main(APIKEY, FILENAME, DBFILE, EXTRA_PARAMS)
+    from config import APIKEY, FILENAME, DBFILE, EXTRA_PARAMS, OLDDBFILE
+    main(APIKEY, FILENAME, DBFILE, EXTRA_PARAMS, OLDDBFILE)
