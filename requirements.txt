@@ -1,8 +1,8 @@
 colorama
+html5lib
 lxml
 pandas
 requests
 six
 tabulate
 xlrd
-html5lib
