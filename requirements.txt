@@ -5,3 +5,4 @@ requests
 six
 tabulate
 xlrd
+html5lib
