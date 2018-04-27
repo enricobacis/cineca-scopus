@@ -117,9 +117,9 @@ def main(apikey, filename, dbfile, extra_params=None, olddbfile=None):
                     if inp.strip().lower() == 'n': continue
                 else:
                     entries = previous_entries
-                    show_entries(entries)
 
             else:
+                print(Fore.GREEN + 'New entries:\n' + _RA)
                 show_entries(entries)
                 if len(entries) == 1 and entries[0][2] >= 0.6:
                     print(Fore.GREEN + '\nSingle good entry for this author\n' + _RA)
