@@ -15,5 +15,5 @@ clean:
 	@ rm -rf *.pyc *.pyo __pycache__
 
 $(VENV): requirements.txt
-	virtualenv $(VENV)
+	virtualenv --system-site-packages $(VENV)
 	$(VENV)/bin/pip install -r requirements.txt
