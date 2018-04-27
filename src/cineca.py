@@ -79,7 +79,7 @@ def init_db(dbfile):
         connection.execute('CREATE TABLE IF NOT EXISTS'
                            ' authors(author, ateneo, id UNIQUE, entry)')
 
-def main(apikey, filename, dbfile, extra_params=None, olddbfile=None):
+def main(apikey, filename, dbfile, extra_params=None, olddbfile=None, exclude=None):
     sc = ScopusClient(apikey)
     init_db(dbfile)
     default_ateneo = None
@@ -92,6 +92,13 @@ def main(apikey, filename, dbfile, extra_params=None, olddbfile=None):
         namefield, ateneo = row['Cognome e Nome'], row.get('Ateneo', default_ateneo)
 
         print('\n%s\n\n%s\n' % ('='*80, row))
+
+        fascia = row['Fascia']
+        if exclude and (fascia in exclude):
+            print(Fore.MAGENTA + 'Skipped (fascia: ' + fascia + ')\n' + _RA)
+            continue
+        else:
+            continue
 
         previous_entries = []
         previous_ids = []
@@ -153,5 +160,5 @@ def main(apikey, filename, dbfile, extra_params=None, olddbfile=None):
                              '. Press any key to continue..' + _RA)
 
 if __name__ == '__main__':
-    from config import APIKEY, FILENAME, DBFILE, EXTRA_PARAMS, OLDDBFILE
-    main(APIKEY, FILENAME, DBFILE, EXTRA_PARAMS, OLDDBFILE)
+    from config import APIKEY, FILENAME, DBFILE, EXTRA_PARAMS, OLDDBFILE, EXCLUDE
+    main(APIKEY, FILENAME, DBFILE, EXTRA_PARAMS, OLDDBFILE, EXCLUDE)

@@ -3,3 +3,4 @@ FILENAME     = 'data/RICERCADOCENTI.xls'
 DBFILE       = 'data/docenti.db'
 OLDDBFILE    = 'data/docenti2016.db'
 EXTRA_PARAMS = {'affil': 'Italy'}
+EXCLUDE      = [ ]
