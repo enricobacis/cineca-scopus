@@ -97,8 +97,6 @@ def main(apikey, filename, dbfile, extra_params=None, olddbfile=None, exclude=No
         if exclude and (fascia in exclude):
             print(Fore.MAGENTA + 'Skipped (fascia: ' + fascia + ')\n' + _RA)
             continue
-        else:
-            continue
 
         previous_entries = []
         previous_ids = []
