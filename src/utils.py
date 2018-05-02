@@ -1,6 +1,6 @@
 from __future__ import division
 from difflib import SequenceMatcher
-import sqlite3
+import sqlalchemy
 import pandas
 import re
 
@@ -37,5 +37,5 @@ def csv_to_db(csvfile, dbfile, tablename):
     data = pandas.read_csv(csvfile)
     data.columns = data.columns.str.strip()
     data.columns = data.columns.str.replace('\s+', '_')
-    with sqlite3.connect(dbfile) as connection:
-        data.to_sql(tablename, connection)
+    engine = sqlalchemy.create_engine('sqlite:///' + dbfile)
+    data.to_sql(tablename, engine)

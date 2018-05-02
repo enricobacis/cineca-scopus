@@ -5,6 +5,7 @@ lxml
 pandas
 requests
 six
+sqlalchemy
 tabulate
 unicodecsv
 xlrd
