@@ -1,7 +1,7 @@
 APIKEY       = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 FILENAME     = 'data/RICERCADOCENTI.xls'
 DBFILE       = 'data/docenti.db'
-OLDDBFILE    = 'data/docenti2016.db'
+OLDDBFILE    = 'data/docenti_old.db'
 OUTFILE      = 'data/products.csv'
 PRODUCTSDB   = 'data/products.db'
 EXTRA_PARAMS = {'affil': 'Italy'}
