@@ -2,7 +2,7 @@
 
 VENV   = venv
 MAIN   = src/cineca.py
-MAIN2  = src/cineca2b.py
+MAIN2  = src/cineca2.py
 MAIN3  = src/cineca3.py
 
 all:
