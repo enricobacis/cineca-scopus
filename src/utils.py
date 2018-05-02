@@ -6,7 +6,7 @@ import re
 
 def read_cineca_file(filename, encoding='latin1'):
     try: data = pandas.read_csv(open(filename))
-    except: data = pandas.read_html(open(filename, 'rb').read())[0]
+    except: data = pandas.read_html(open(filename, 'rb').read(), encoding=encoding)[0]
     data['Cognome e Nome'] = data['Cognome e Nome'].str.normalize('NFKD')
     return list(row for idx, row in data.T.iteritems())
 
