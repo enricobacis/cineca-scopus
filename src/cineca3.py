@@ -4,7 +4,8 @@ from contextlib import closing
 from operator import itemgetter
 from datetime import datetime
 from argparse import ArgumentParser
-from csv import DictWriter, DictReader
+from csv import DictWriter
+from utils import *
 import sqlite3
 import json
 import re
@@ -60,21 +61,23 @@ def mergedicts(*dicts):
 
 if __name__ == '__main__':
 
+    from config import FILENAME, DBFILE, OUTFILE
+
     parser = ArgumentParser('convert scopus db to csv')
-    parser.add_argument('INFILE', help='input csv file')
-    parser.add_argument('DBFILE', help='database file')
-    parser.add_argument('OUTFILE', help='output csv file')
+    parser.add_argument('--input', default=FILENAME, help='cineca input file')
+    parser.add_argument('--db', default=DBFILE, help='database file')
+    parser.add_argument('--output', default=OUTFILE, help='output csv file')
     args = parser.parse_args()
 
-    with open(args.INFILE) as infile, open(args.OUTFILE, 'w') as outfile:
-        csvreader = DictReader(infile)
+    with open(args.output, 'w') as outfile:
+        csvreader = [row.to_dict() for row in read_cineca_file(args.input)]
         authors = [(row['Cognome e Nome'], row['Ateneo'], row) for row in csvreader]
         authors.sort(key=itemgetter(0, 1))
 
         csvwriter = DictWriter(outfile, FIELDS, extrasaction='ignore')
         csvwriter.writeheader()
 
-        with sqlite3.connect(args.DBFILE) as connection:
+        with sqlite3.connect(args.db) as connection:
             with closing(connection.cursor()) as cursor:
                 for author, ateneo, authordata in authors:
                     entries = cursor.execute(QUERY, (author,ateneo)).fetchall()
@@ -85,8 +88,9 @@ if __name__ == '__main__':
                         inserted = set()
                         for entry in json.loads(entries[0][0]):
                             ID = entry.get('dc:identifier', '')
+                            print('%s\t%s' % (author, ID))
                             if ID in inserted:
-                                print('Ignore duplicate (%s,%s)' % (author, ID))
+                                print(' * duplicate ignored *')
                             else:
                                 inserted.add(ID)
                                 csvwriter.writerow(process(mergedicts(authordata, entry)))
