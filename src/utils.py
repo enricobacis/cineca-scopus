@@ -34,8 +34,8 @@ def fuzzy_score(query, string):
     return len(match) / len(query)
 
 def csv_to_db(csvfile, dbfile, tablename):
-    data = pandas.read_csv(csvfile)
+    data = pandas.read_csv(csvfile, encoding='utf-8')
     data.columns = data.columns.str.strip()
     data.columns = data.columns.str.replace('\s+', '_')
     engine = sqlalchemy.create_engine('sqlite:///' + dbfile)
-    data.to_sql(tablename, engine)
+    data.to_sql(tablename, engine, if_exists='replace')
