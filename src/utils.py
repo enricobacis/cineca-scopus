@@ -1,5 +1,6 @@
 from __future__ import division
 from difflib import SequenceMatcher
+import sqlite3
 import pandas
 import re
 
@@ -31,3 +32,10 @@ def fuzzy_score(query, string):
     blocks = SequenceMatcher(None, string, query).get_matching_blocks()
     match = ''.join(string[i:i+n] for i,j,n in blocks if n > 1)
     return len(match) / len(query)
+
+def csv_to_db(csvfile, dbfile, tablename):
+    data = pandas.read_csv(csvfile)
+    data.columns = data.columns.str.strip()
+    data.columns = data.columns.str.replace('\s+', '_')
+    with sqlite3.connect(dbfile) as connection:
+        data.to_sql(tablename, connection)

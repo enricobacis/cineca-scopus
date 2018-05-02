@@ -5,7 +5,7 @@ from operator import itemgetter
 from datetime import datetime
 from argparse import ArgumentParser
 from csv import DictWriter
-from utils import *
+from utils import read_cineca_file, csv_to_db
 import sqlite3
 import json
 import re
@@ -61,12 +61,13 @@ def mergedicts(*dicts):
 
 if __name__ == '__main__':
 
-    from config import FILENAME, DBFILE, OUTFILE
+    from config import FILENAME, DBFILE, OUTFILE, PRODUCTSDB
 
     parser = ArgumentParser('convert scopus db to csv')
     parser.add_argument('--input', default=FILENAME, help='cineca input file')
     parser.add_argument('--db', default=DBFILE, help='database file')
     parser.add_argument('--output', default=OUTFILE, help='output csv file')
+    parser.add_argument('--outdb', default=PRODUCTSDB, help='output db file')
     args = parser.parse_args()
 
     with open(args.output, 'w') as outfile:
@@ -94,3 +95,6 @@ if __name__ == '__main__':
                             else:
                                 inserted.add(ID)
                                 csvwriter.writerow(process(mergedicts(authordata, entry)))
+
+    print('\n[*] Converting csv to sqlite3db ...')
+    csv_to_db(args.output, args.outdb, 'products')
