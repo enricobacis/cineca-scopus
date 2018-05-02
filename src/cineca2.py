@@ -2,6 +2,7 @@
 
 from contextlib import closing
 from scopus import ScopusClient
+from six import text_type
 import os.path
 import sqlite3
 import pprint
@@ -20,6 +21,11 @@ csvfields = ['authorId', 'scopusId', 'eid', 'title', 'issn', 'publicationName',
 
 
 def process_entry(entry, author_id):
+
+    def tryor(fn, value_or, *args, **kwargs):
+        try: return fn(*args, **kwargs)
+        except: return value_or
+
     processed = {
         'authorId': author_id,
         'scopusId': entry.get('dc:identifier', '').lstrip('SCOPUS_ID:'),
@@ -33,8 +39,8 @@ def process_entry(entry, author_id):
         'authors': ', '.join('%s %s' % (author.get('given-name', ''),
                                         author.get('surname', ''))
                              for author in entry.get('author', [])),
-        'author-count': int(entry.get('author-count', {}).get('$', '1')),
-        'citedby-count': int(entry.get('citedby-count', '0')),
+        'author-count': tryor(int, 1, entry.get('author-count', {}).get('$', '1')),
+        'citedby-count': tryor(int, 0, entry.get('citedby-count', '0')),
         'pageRange': entry.get('prism:pageRange', ''),
         'coverDate': entry.get('prism:coverDate', ''),
         'coverDisplayDate': entry.get('prism:coverDisplayDate', ''),
@@ -44,7 +50,7 @@ def process_entry(entry, author_id):
         'subtypeDescription': entry.get('subtypeDescription', '')
     }
 
-    return {k: unicode(v).encode('utf-8') for k,v in processed.items()}
+    return {k: text_type(v).encode('utf-8') for k,v in processed.items()}
 
 if __name__ == '__main__':
     sc = ScopusClient(APIKEY)
@@ -66,7 +72,7 @@ if __name__ == '__main__':
 
                         for entry in entries:
                             processed = process_entry(entry, author_id)
-                            pprint.pprint(processed, indent=4)
+                            # pprint.pprint(processed, indent=4)
                             writer.writerow(processed)
 
                         print(Fore.GREEN + ('Entries: %d' % len(entries)))
