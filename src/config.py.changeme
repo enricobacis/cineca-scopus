@@ -2,5 +2,6 @@ APIKEY       = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 FILENAME     = 'data/RICERCADOCENTI.xls'
 DBFILE       = 'data/docenti.db'
 OLDDBFILE    = 'data/docenti2016.db'
+OUTFILE      = 'data/products_joined.csv'
 EXTRA_PARAMS = {'affil': 'Italy'}
 EXCLUDE      = [ ]
