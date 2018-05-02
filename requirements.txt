@@ -6,4 +6,5 @@ pandas
 requests
 six
 tabulate
+unicodecsv
 xlrd

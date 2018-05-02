@@ -5,7 +5,7 @@ from contextlib import closing
 from operator import itemgetter
 from datetime import datetime
 from argparse import ArgumentParser
-from csv import DictWriter
+from unicodecsv import DictWriter
 from utils import read_cineca_file, csv_to_db
 import sqlite3
 import json
@@ -71,12 +71,12 @@ if __name__ == '__main__':
     parser.add_argument('--outdb', default=PRODUCTSDB, help='output db file')
     args = parser.parse_args()
 
-    with open(args.output, 'w') as outfile:
+    with open(args.output, 'wb') as outfile:
         csvreader = [row.to_dict() for row in read_cineca_file(args.input)]
         authors = [(row['Cognome e Nome'], row['Ateneo'], row) for row in csvreader]
         authors.sort(key=itemgetter(0, 1))
 
-        csvwriter = DictWriter(outfile, FIELDS, extrasaction='ignore')
+        csvwriter = DictWriter(outfile, FIELDS, extrasaction='ignore', encoding='utf-8')
         csvwriter.writeheader()
 
         with sqlite3.connect(args.db) as connection:
