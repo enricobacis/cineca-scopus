@@ -8,9 +8,11 @@ import json
 from colorama import init, Fore
 init(autoreset=True)
 
-from config import APIKEY, DBFILE
 
 if __name__ == '__main__':
+
+    from config import APIKEY, DBFILE
+
     sc = ScopusClient(APIKEY)
     query = ('SELECT author, ateneo, group_concat(id) '
              'FROM authors GROUP BY author, ateneo')

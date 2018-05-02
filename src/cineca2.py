@@ -11,8 +11,6 @@ import csv
 from colorama import init, Fore
 init(autoreset=True)
 
-from config import APIKEY, DBFILE
-
 
 csvfields = ['authorId', 'scopusId', 'eid', 'title', 'issn', 'publicationName',
              'isbn', 'documenttype', 'authors', 'author-count', 'citedby-count',
@@ -53,6 +51,9 @@ def process_entry(entry, author_id):
     return {k: text_type(v).encode('utf-8') for k,v in processed.items()}
 
 if __name__ == '__main__':
+
+    from config import APIKEY, DBFILE
+
     sc = ScopusClient(APIKEY)
     query = 'SELECT author, id FROM authors ORDER BY author'
 
